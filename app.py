@@ -1,36 +1,11 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify,request
 from flask_cors import CORS
-import requests
 import json
-
+from consul import register_service_with_consul,SERVICE_PORT
+from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-# Configuration de service
-SERVICE_NAME = "analyses"
-SERVICE_PORT = 5002
-CONSUL_AGENT_URL = "http://localhost:8500/v1/agent/service/register"
-
-# Fonction pour enregistrer le service auprès de Consul
-def register_service_with_consul():
-    service_info = {
-        "name": SERVICE_NAME,
-        "tags": ["analyses", "flask"],
-        "port": SERVICE_PORT,
-        "check": {
-            "http": f"http://127.0.0.1:{SERVICE_PORT}/api/{SERVICE_NAME}/health",
-            "interval": "10s"
-        }
-    }
-
-    try:
-        response = requests.put(CONSUL_AGENT_URL, data=json.dumps(service_info))
-        if response.status_code == 200:
-            print("Service enregistré avec succès dans Consul.")
-        else:
-            print("Erreur lors de l'enregistrement du service dans Consul:", response.text)
-    except Exception as e:
-        print("Erreur lors de la communication avec Consul:", str(e))
 
 @app.route('/api/analyses/health')
 def health():
@@ -38,15 +13,46 @@ def health():
 
 @app.route('/api/analyses/')
 def getAll():
-    print("here")
-    data = [
-        {"nom": "Analyse 1","dateCreation": "01/01/24", "auteur": "Andy", "description": "Description 1"},
-        { "nom": "Analyse 2","dateCreation": "01/01/24", "auteur": "Andy", "description": "Description 2"},
-        { "nom": "Analyse 3","dateCreation": "01/01/24", "auteur": "Andy", "description": "Description 3"},
-        { "nom": "Analyse 4","dateCreation": "01/01/24", "auteur": "Andy", "description": "Description 4"}
-
-    ]
+    with open('analyseStaticData.json') as f: 
+        data = json.load(f)
     return jsonify(data)
+@app.route('/api/analyses/<int:id>',methods=["GET"])
+def getAnalyseById(id):
+    print(id)
+    with open('analyseStaticData.json') as f: 
+        analyses = json.load(f)
+        analyse=[item for item in analyses if item["id"] ==id]
+    if analyses:
+        return jsonify(analyse[0])
+    else:
+        return jsonify({"error": "Analyse not found"}), 404
+
+def convert_date(date_str):
+    """Converts a date string from DD-MM-YYYY to a datetime object."""
+    return datetime.strptime(date_str, "%d-%m-%Y")
+@app.route('/api/analyses/filter', methods=['GET'])
+def filter_data():
+    start_date_str = request.args.get('start_date', '')
+    end_date_str = request.args.get('end_date', '')
+    search_term = request.args.get('search_term', '').lower()
+    # Convert the start and end dates from DD-MM-YYYY to datetime objects
+    start_date = convert_date(start_date_str) if start_date_str else None
+    end_date = convert_date(end_date_str) if end_date_str else None
+
+    with open('analyseStaticData.json') as f:
+        data = json.load(f)
+        filtered_data = []
+        for item in data:
+            item_date = convert_date(item['dateCreation'])
+            if ((not start_date or item_date >= start_date) and
+                (not end_date or item_date <= end_date) and
+                (not search_term or search_term in item['nom'].lower() or search_term in item['type'].lower())):
+                filtered_data.append(item)
+
+        if filtered_data:
+            return jsonify(filtered_data)
+        else:
+            return jsonify({"error": "No analyse found matching the criteria"}), 404
 
 if __name__ == "__main__":
     register_service_with_consul()
