@@ -3,9 +3,14 @@ from flask_cors import CORS
 import json
 from consul import register_service_with_consul,SERVICE_PORT
 from datetime import datetime
+from models.analyses import db
+from config.config import Config
+from models.analyses import Analyses, Datasets, AnalysesDatasets 
+
 app = Flask(__name__)
 CORS(app)
-
+app.config.from_object(Config)
+db.init_app(app)
 
 @app.route('/api/analyses/health')
 def health():
@@ -16,6 +21,7 @@ def getAll():
     with open('analyseStaticData.json') as f: 
         data = json.load(f)
     return jsonify(data)
+
 @app.route('/api/analyses/<int:id>',methods=["GET"])
 def getAnalyseById(id):
     print(id)
@@ -30,6 +36,7 @@ def getAnalyseById(id):
 def convert_date(date_str):
     """Converts a date string from DD-MM-YYYY to a datetime object."""
     return datetime.strptime(date_str, "%d-%m-%Y")
+
 @app.route('/api/analyses/filter', methods=['GET'])
 def filter_data():
     start_date_str = request.args.get('start_date', '')
@@ -53,6 +60,96 @@ def filter_data():
             return jsonify(filtered_data)
         else:
             return jsonify({"error": "No analyse found matching the criteria"}), 404
+
+            
+@app.route('/api/analyses/all', methods=['GET'])
+def getAlla():
+    # Récupérer tous les modèles depuis la base de données
+    datasets = Datasets.query.all()
+    # Créer une liste des données des modèles pour les renvoyer au client
+    serialized_datasets = [{
+            "iddataset": dataset.iddataset,
+            "created_at": dataset.created_at,
+            "nameDataset": dataset.namedataset,
+            "descriptionDataset": dataset.descriptiondataset,
+            "typeDataset": dataset.typedataset,
+            "leads_name": dataset.leads_name,
+            "study_name": dataset.study_name,
+            "study_details": dataset.study_details,
+            "source_name": dataset.source_name,
+            "source_details": dataset.source_details
+        } for dataset in datasets]
+    return jsonify(serialized_datasets)
+
+@app.route('/api/analyses/<int:id>/datasets', methods=['GET'])
+def get_datasets_for_analysis(id):
+    try:
+        # Fetch the datasets associated with the analysis
+        datasets = Datasets.query.join(AnalysesDatasets, AnalysesDatasets.iddataset == Datasets.iddataset) \
+                                  .filter(AnalysesDatasets.idanalysis == id) \
+                                  .all()
+
+        # Serialize datasets to JSON format
+        serialized_datasets = [{
+            "idDataset": dataset.iddataset,
+            "created_at": dataset.created_at,
+            "nameDataset": dataset.namedataset,
+            "descriptionDataset": dataset.descriptiondataset,
+            "typeDataset": dataset.typedataset,
+            "leads_name": dataset.leads_name,
+            "study_name": dataset.study_name,
+            "study_details": dataset.study_details,
+            "source_name": dataset.source_name,
+            "source_details": dataset.source_details
+        } for dataset in datasets]
+
+        return jsonify(serialized_datasets), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/analyses/<int:id>/datasets', methods=['POST'])
+def add_datasets_to_analysis(id):
+    try:
+        # Récupérer les données de la nouvelle dataset depuis la requête
+        new_datasets_data = request.json
+        print(new_datasets_data)
+        # Ajouter les nouvelles datasets à l'analyse dans la base de données
+        for dataset_data in new_datasets_data:
+            print("dataset_data " + str(dataset_data))  # Convertir en chaîne de caractères
+            # Extract the iddataset from the dataset_data
+            iddataset = dataset_data['iddataset']
+            print("iddataset " + str(iddataset))  
+            # Insérer l'association dans la table 'AnalysesDatasets'
+            new_association = AnalysesDatasets(idanalysis=id, iddataset=iddataset)
+            print(new_association)
+            db.session.add(new_association)
+        
+        # Commit des changements dans la base de données
+        db.session.commit()
+
+        # Rafraîchir les données des datasets de l'analyse après l'ajout des nouvelles datasets
+        updated_datasets = Datasets.query.join(AnalysesDatasets, AnalysesDatasets.iddataset == Datasets.iddataset) \
+                                  .filter(AnalysesDatasets.idanalysis == id) \
+                                  .all()
+
+        # Serialize datasets to JSON format
+        serialized_datasets = [{
+            "idDataset": dataset.iddataset,
+            "created_at": dataset.created_at,
+            "nameDataset": dataset.namedataset,
+            "descriptionDataset": dataset.descriptiondataset,
+            "typeDataset": dataset.typedataset,
+            "leads_name": dataset.leads_name,
+            "study_name": dataset.study_name,
+            "study_details": dataset.study_details,
+            "source_name": dataset.source_name,
+            "source_details": dataset.source_details
+        } for dataset in updated_datasets]
+
+        return jsonify(serialized_datasets), 200
+    except Exception as e:
+        db.session.rollback()  # Rollback en cas d'erreur pour annuler les changements
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     register_service_with_consul()
