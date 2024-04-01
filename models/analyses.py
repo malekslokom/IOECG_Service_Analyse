@@ -1,25 +1,23 @@
 from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import CheckConstraint
-db = SQLAlchemy()
-
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
 
 db = SQLAlchemy()
 
 class Projet(db.Model):
     __tablename__ = 'projets'
 
-    idProject = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_project = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.now())
     last_updated_at = db.Column(db.TIMESTAMP, server_default=db.func.now(), onupdate=db.func.now())
-    nameProject = db.Column(db.String, nullable=False)
-    descriptionProject = db.Column(db.Text)
+    name_project = db.Column(db.String, nullable=False)
+    description_project = db.Column(db.Text)
     created_by = db.Column(db.String, nullable=False)
-    typeProject = db.Column(db.String, nullable=False)
+    type_project = db.Column(db.String, nullable=False)
 
     __table_args__ = (
-        db.CheckConstraint(typeProject.in_(["Classification", "Régression", "Visualisation"]), name='check_type_project'),
+        db.CheckConstraint(type_project.in_(["Classification", "Régression", "Visualisation"]), name='check_type_project'),
     )
     # Define a one-to-many relationship with Analyses
     analyses = db.relationship('Analyses', backref='projet')
@@ -29,7 +27,7 @@ class Analyses(db.Model):
     __tablename__ = 'analyses'
 
     id_analysis = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_project = db.Column(db.Integer, db.ForeignKey('projets.idProject'))
+    id_project = db.Column(db.Integer, db.ForeignKey('projets.id_project'))
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.now())
     last_updated_at = db.Column(db.TIMESTAMP, server_default=db.func.now(), onupdate=db.func.now())
     name_analysis = db.Column(db.String, nullable=False)
@@ -61,10 +59,68 @@ class Datasets(db.Model):
 class AnalysesDatasets(db.Model):
     __tablename__ = 'analyses_datasets'
 
-    id_dataset_analysis = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_dataset_analysis = db.Column(db.Integer, primary_key=True)
     id_dataset = db.Column(db.Integer, db.ForeignKey('datasets.id_dataset'))
     id_analysis = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
 
     # dataset = db.relationship('Datasets', back_populates='analyses_datasets', primaryjoin=iddataset == Datasets.iddataset)
     # analyse = db.relationship('Analyses', back_populates='datasets', primaryjoin=idAnalysis == Analyses.idAnalysis)
 
+class Patient(db.Model):
+    __tablename__ = 'patients'
+
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=func.current_timestamp(), nullable=False)
+    last_updated_at = db.Column(db.DateTime, default=func.current_timestamp(), onupdate=func.current_timestamp(), nullable=False)
+    dataset_id = db.Column(db.Integer, nullable=False)
+    patient_original_id = db.Column(db.String, nullable=False)
+    age = db.Column(db.Integer)
+    birth_date = db.Column(db.String)
+    height = db.Column(db.String)
+    weight = db.Column(db.String)
+    sex = db.Column(db.String)
+    race = db.Column(db.String)
+    observation = db.Column(db.Text)
+
+    def __repr__(self):
+        return f"<Patient(id={self.id}, created_at={self.created_at}, last_updated_at={self.last_updated_at}, dataset_id={self.dataset_id}, " \
+               f"patient_original_id={self.patient_original_id}, age={self.age}, birth_date={self.birth_date}, " \
+               f"height={self.height}, weight={self.weight}, sex={self.sex}, race={self.race}, observation={self.observation})>"
+class Ecg(db.Model):
+    __tablename__ = 'ecg'
+
+    id_ecg = db.Column(db.Integer, primary_key=True)
+    id_patient = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    filepath = db.Column(db.String, nullable=False)
+    recording_started_at = db.Column(db.TIMESTAMP, nullable=False)
+    recording_ended_at = db.Column(db.TIMESTAMP, nullable=False)
+    recording_initial_sampling_rate = db.Column(db.Integer, nullable=False)
+    recording_sampling_rate = db.Column(db.Integer, nullable=False)
+    recording_duration = db.Column(db.Integer, nullable=False)
+    protocol_details = db.Column(db.JSON)
+
+class EcgLead(db.Model):
+    __tablename__ = 'ecg_leads'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ecg_id = db.Column(db.Integer, db.ForeignKey('ecg.id_ecg'), nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    dataset_id = db.Column(db.Integer, nullable=False)
+    lead_i = db.Column(db.ARRAY(db.REAL))
+    lead_ii = db.Column(db.ARRAY(db.REAL))
+    lead_iii = db.Column(db.ARRAY(db.REAL))
+    lead_avr = db.Column(db.ARRAY(db.REAL))
+    lead_avf = db.Column(db.ARRAY(db.REAL))
+    lead_avl = db.Column(db.ARRAY(db.REAL))
+    lead_v1 = db.Column(db.ARRAY(db.REAL))
+    lead_v2 = db.Column(db.ARRAY(db.REAL))
+    lead_v3 = db.Column(db.ARRAY(db.REAL))
+    lead_v4 = db.Column(db.ARRAY(db.REAL))
+    lead_v5 = db.Column(db.ARRAY(db.REAL))
+    lead_v6 = db.Column(db.ARRAY(db.REAL))
+    lead_x = db.Column(db.ARRAY(db.REAL))
+    lead_y = db.Column(db.ARRAY(db.REAL))
+    lead_z = db.Column(db.ARRAY(db.REAL))
+    lead_es = db.Column(db.ARRAY(db.REAL))
+    lead_as = db.Column(db.ARRAY(db.REAL))
+    lead_ai = db.Column(db.ARRAY(db.REAL))
