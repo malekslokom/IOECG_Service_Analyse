@@ -124,3 +124,12 @@ class EcgLead(db.Model):
     lead_es = db.Column(db.ARRAY(db.REAL))
     lead_as = db.Column(db.ARRAY(db.REAL))
     lead_ai = db.Column(db.ARRAY(db.REAL))
+
+
+class DatasetsECG(db.Model):
+    __tablename__ = 'datasets_ecg'
+
+    id_dataset = db.Column(db.Integer, db.ForeignKey('datasets.id_dataset'), primary_key=True)
+    id_ecg = db.Column(db.Integer, db.ForeignKey('ecg.id_ecg'), primary_key=True)
+
+

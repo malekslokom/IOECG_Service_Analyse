@@ -3,10 +3,9 @@ from flask_cors import CORS
 import json
 from consul import register_service_with_consul,SERVICE_PORT
 from datetime import datetime
-from models.analyses import db
-from config.config import Config
-from models.analyses import Analyses, Datasets, AnalysesDatasets 
+from models.datasets import db,Analyses, Datasets, AnalysesDatasets 
 
+from config.config import Config
 app = Flask(__name__)
 CORS(app)
 app.config.from_object(Config)

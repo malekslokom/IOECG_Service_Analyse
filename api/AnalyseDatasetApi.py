@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from flask import jsonify, request
-from models.analyses import db,Analyses, Datasets, AnalysesDatasets,Patient,Ecg ,EcgLead
+from models.datasets import db,Analyses, Datasets, AnalysesDatasets,Patient,Ecg ,EcgLead,DatasetsECG
 from sqlalchemy import func
             
 def getAllDatasetsTest():
@@ -30,8 +30,17 @@ def get_datasets_for_analysis(id):
 
         serialized_datasets=[]
         for dataset in datasets:
-            num_patients = Patient.query.filter_by(dataset_id=dataset.id_dataset).count()
-            num_ecgs = Ecg.query.join(EcgLead).filter_by(dataset_id=dataset.id_dataset).count()
+            
+            if dataset.type_dataset=='standard':
+                num_ecgs = Ecg.query.join(EcgLead).filter_by(dataset_id=dataset.id_dataset).count()
+                num_patients = Patient.query.filter_by(dataset_id=dataset.id_dataset).count()
+            else:
+                num_ecgs = DatasetsECG.query.filter_by(id_dataset=dataset.id_dataset).count()
+                num_patients = Patient.query\
+                                .join(Ecg, Patient.id == Ecg.id_patient)\
+                                .join(DatasetsECG, Ecg.id_ecg == DatasetsECG.id_ecg)\
+                                .filter(DatasetsECG.id_dataset == dataset.id_dataset, Ecg.id_ecg == DatasetsECG.id_ecg)\
+                                .count()
             print(num_ecgs)
             serialized_datasets.append({
                 "idDataset": dataset.id_dataset,
@@ -58,30 +67,35 @@ def add_datasets_to_analysis(id):
         # Ajouter les nouvelles datasets à l'analyse dans la base de données
         for dataset_data in new_datasets_data:
             iddataset = dataset_data['idDataset']
-            new_association = AnalysesDatasets(id_analysis=id, id_dataset=iddataset)
-            db.session.add(new_association)
+            # Check if the association already exists
+            existing_association = AnalysesDatasets.query.filter_by(id_analysis=id, id_dataset=iddataset).first()
+            if not existing_association:
+                # If association doesn't exist, add it
+                new_association = AnalysesDatasets(id_analysis=id, id_dataset=iddataset)
+                db.session.add(new_association)
         
         db.session.commit()
 
         # Rafraîchir les données des datasets de l'analyse après l'ajout des nouvelles datasets
-        updated_datasets = Datasets.query.join(AnalysesDatasets, AnalysesDatasets.id_dataset == Datasets.id_dataset) \
-                                  .filter(AnalysesDatasets.id_analysis == id) \
-                                  .all()
+        # updated_datasets = Datasets.query.join(AnalysesDatasets, AnalysesDatasets.id_dataset == Datasets.id_dataset) \
+        #                           .filter(AnalysesDatasets.id_analysis == id) \
+        #                           .all()
 
-        serialized_datasets = [{
-            "idDataset": dataset.id_dataset,
-            "created_at": dataset.created_at,
-            "nameDataset": dataset.name_dataset,
-            "descriptionDataset": dataset.description_dataset,
-            "typeDataset": dataset.type_dataset,
-            "leads_name": dataset.leads_name,
-            "study_name": dataset.study_name,
-            "study_details": dataset.study_details,
-            "source_name": dataset.source_name,
-            "source_details": dataset.source_details
-        } for dataset in updated_datasets]
+        # serialized_datasets = [{
+        #     "idDataset": dataset.id_dataset,
+        #     "created_at": dataset.created_at,
+        #     "nameDataset": dataset.name_dataset,
+        #     "descriptionDataset": dataset.description_dataset,
+        #     "typeDataset": dataset.type_dataset,
+        #     "leads_name": dataset.leads_name,
+        #     "study_name": dataset.study_name,
+        #     "study_details": dataset.study_details,
+        #     "source_name": dataset.source_name,
+        #     "source_details": dataset.source_details
+        # } for dataset in updated_datasets]
 
-        return jsonify(serialized_datasets), 200
+        # return jsonify(serialized_datasets), 200
+        return get_datasets_for_analysis(id)
     except Exception as e:
         db.session.rollback()  
         return jsonify({"error": str(e)}), 500
