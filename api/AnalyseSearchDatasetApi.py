@@ -64,6 +64,7 @@ def get_filters_data():
             'sex': patient.sex,
             
             # ECG information
+            'id_ecg':ecg.id_ecg,
             'recording_started_at': ecg.recording_started_at,
             'recording_ended_at': ecg.recording_ended_at,
             'recording_initial_sampling_rate': ecg.recording_initial_sampling_rate,

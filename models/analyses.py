@@ -44,10 +44,10 @@ class Datasets(db.Model):
     name_dataset = db.Column(db.String(), nullable=False)
     description_dataset = db.Column(db.Text, default=None)
     type_dataset = db.Column(db.String(), nullable=False)
-    leads_name = db.Column(db.Text, nullable=False)
-    study_name = db.Column(db.String(), nullable=False)
+    leads_name = db.Column(db.Text, nullable=False,default="")
+    study_name = db.Column(db.String(), nullable=False,default="")
     study_details = db.Column(db.String(), default=None)
-    source_name = db.Column(db.String(), nullable=False)
+    source_name = db.Column(db.String(), nullable=False,default="")
     source_details = db.Column(db.String(), default=None)
 
     __table_args__ = (
