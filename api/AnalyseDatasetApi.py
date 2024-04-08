@@ -8,11 +8,11 @@ def getAllDatasetsTest():
     datasets = Datasets.query.all()
     # Créer une liste des données des modèles pour les renvoyer au client
     serialized_datasets = [{
-        "idDataset": dataset.id_dataset,
+        "id_dataset": dataset.id_dataset,
         "created_at": dataset.created_at,
-        "nameDataset": dataset.name_dataset,
-        "descriptionDataset": dataset.description_dataset,
-        "typeDataset": dataset.type_dataset,
+        "name_dataset": dataset.name_dataset,
+        "description_dataset": dataset.description_dataset,
+        "type_dataset": dataset.type_dataset,
         "leads_name": dataset.leads_name,
         "study_name": dataset.study_name,
         "study_details": dataset.study_details,
@@ -43,11 +43,11 @@ def get_datasets_for_analysis(id):
                                 .count()
             print(num_ecgs)
             serialized_datasets.append({
-                "idDataset": dataset.id_dataset,
+                "id_dataset": dataset.id_dataset,
                 "created_at": dataset.created_at,
-                "nameDataset": dataset.name_dataset,
-                "descriptionDataset": dataset.description_dataset,
-                "typeDataset": dataset.type_dataset,
+                "name_dataset": dataset.name_dataset,
+                "description_dataset": dataset.description_dataset,
+                "type_dataset": dataset.type_dataset,
                 "leads_name": dataset.leads_name,
                 "study_name": dataset.study_name,
                 "study_details": dataset.study_details,
