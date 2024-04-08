@@ -66,7 +66,7 @@ def add_datasets_to_analysis(id):
         new_datasets_data = request.json
         # Ajouter les nouvelles datasets à l'analyse dans la base de données
         for dataset_data in new_datasets_data:
-            iddataset = dataset_data['idDataset']
+            iddataset = dataset_data['id_dataset']
             # Check if the association already exists
             existing_association = AnalysesDatasets.query.filter_by(id_analysis=id, id_dataset=iddataset).first()
             if not existing_association:
@@ -117,3 +117,5 @@ def delete_dataset_from_analysis(id, id_dataset):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+
