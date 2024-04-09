@@ -66,6 +66,14 @@ class AnalysesDatasets(db.Model):
     # dataset = db.relationship('Datasets', back_populates='analyses_datasets', primaryjoin=iddataset == Datasets.iddataset)
     # analyse = db.relationship('Analyses', back_populates='datasets', primaryjoin=idAnalysis == Analyses.idAnalysis)
 
+
+class AnalysesModeles(db.Model):
+    __tablename__ = 'analyses_modeles'
+
+    id_model_analysis = db.Column(db.Integer, primary_key=True)
+    id_model = db.Column(db.Integer, db.ForeignKey('modeles.id_model'))
+    id_analysis = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
+
 class Patient(db.Model):
     __tablename__ = 'patients'
 
@@ -138,8 +146,10 @@ class Experiences(db.Model):
     __tablename__ = 'experiences'
 
     id_experience = db.Column(db.Integer, primary_key=True)
-    id_model = db.Column(db.ARRAY(db.Integer), nullable=False)
-    id_dataset = db.Column(db.ARRAY(db.Integer), nullable=False)
+    id_models = db.Column(db.Integer, db.ForeignKey('analyses_modeles.id_model_analysis'), nullable=False)
+    id_datasets = db.Column(db.Integer, db.ForeignKey('analyses_datasets.id_dataset_analysis'), nullable=False)
+    models = db.Column(db.ARRAY(db.Integer), nullable=False)
+    datasets = db.Column(db.ARRAY(db.Integer), nullable=False)
     nom_machine = db.Column(db.String())
     nb_gpu = db.Column(db.Integer)
     nb_processeurs = db.Column(db.Integer)
