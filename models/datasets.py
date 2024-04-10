@@ -146,8 +146,6 @@ class Experiences(db.Model):
     __tablename__ = 'experiences'
 
     id_experience = db.Column(db.Integer, primary_key=True)
-    id_models = db.Column(db.Integer, db.ForeignKey('analyses_modeles.id_model_analysis'), nullable=False)
-    id_datasets = db.Column(db.Integer, db.ForeignKey('analyses_datasets.id_dataset_analysis'), nullable=False)
     models = db.Column(db.ARRAY(db.Integer), nullable=False)
     datasets = db.Column(db.ARRAY(db.Integer), nullable=False)
     nom_machine = db.Column(db.String())
