@@ -93,7 +93,7 @@ def addAnalyse():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/api/Analyses/delete/<int:id>',methods=["DELETE"])
+@app.route('/api/analyses/delete/<int:id>',methods=["DELETE"])
 def deleteAnalyseById(id):
     print(id)
     analyse = Analyses.query.filter_by(id_analysis=id).first()  # on recupere l'analyse a supprimer
