@@ -9,7 +9,7 @@ def getAllExperiences():
     # Créer une liste des données des experiences pour les renvoyer au client
     serialized_experiences = [{
         "id_experience": experience.id_experience,
-        'id_analysis': experience.id_analysis, 
+        'id_analysis_experience': experience.id_analysis_experience, 
         "name_experience": experience.name_experience,
         "models": experience.models,
         "datasets": experience.datasets,
@@ -24,11 +24,11 @@ def getAllExperiences():
             
 
 def get_experiences_for_analysis(id_analyse):
-    experiences = Experiences.query.filter_by(id_analysis=id_analyse).all()  
+    experiences = Experiences.query.filter_by(id_analysis_experience=id_analyse).all()  
 
     # Convertir les résultats en une liste JSON
     serialized_experiences = [{'id_experience': exp.id_experience, 
-                        'id_analysis': exp.id_analysis, 
+                        'id_analysis_experience': exp.id_analysis_experience, 
                         'name_experience': exp.name_experience,
                         "models": exp.models,
                         "datasets": exp.datasets,
@@ -47,7 +47,7 @@ def getExperienceById(id_experience):
     if experience:
         experience_data = {
             "id_experience": experience.id_experience,
-            "id_analysis" : experience.id_analysis,
+            "id_analysis_experience" : experience.id_analysis_experience,
             "name_experience": experience.name_experience,
             "models": experience.models,
             "datasets": experience.datasets,
@@ -68,7 +68,9 @@ def getExperienceById(id_experience):
 def createExperience(id_analyse):
     data = request.json  
     
-    id_analysis = data.get(id_analyse)
+    print(id_analyse)
+
+    id_analysis_experience = data.get('id_analysis_experience')
     name_experience = data.get('name_experience'),
     models = data.get("models"),
     datasets = data.get("datasets"),
@@ -82,7 +84,7 @@ def createExperience(id_analyse):
     print(data)
 
     # Création de la nouvelle experience
-    new_experience = Experiences(id_analysis=id_analysis,name_experience=name_experience,models=models,
+    new_experience = Experiences(id_analysis_experience=id_analysis_experience,name_experience=name_experience,models=models,
                                  datasets=datasets,nom_machine=nom_machine,nb_gpu=nb_gpu,
                                   nb_processeurs=nb_processeurs, heure_lancement=heure_lancement,
                                   heure_fin_prevu=heure_fin_prevu, statut=statut )   
@@ -94,5 +96,24 @@ def createExperience(id_analyse):
         return jsonify({"message": "Experience créé avec succès"}), 201
     except Exception as e:
         # Erreur, annuler les modifications et renvoyer un message d'erreur
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+
+def update_experience_status(id_experience):
+    experience = Experiences.query.get(id_experience)
+    if not experience:
+        return jsonify({"error": "Experience non trouvée"}), 404
+    
+    data = request.json
+    new_status = data.get("statut")
+    if new_status is None:
+        return jsonify({"error": "Champ 'statut' vide"}), 400
+    
+    experience.statut = new_status
+    try:
+        db.session.commit()
+        return jsonify({"message": "Mise à jour du stautt réussi"}), 200
+    except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500

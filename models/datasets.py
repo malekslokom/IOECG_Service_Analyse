@@ -145,7 +145,7 @@ class DatasetsECG(db.Model):
 
 class Experiences(db.Model):
     __tablename__ = 'experiences'
-    id_analysis = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
+    id_analysis_experience = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
     id_experience = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name_experience = db.Column(db.String)
     models = db.Column(ARRAY(db.Integer), nullable=False)
