@@ -137,6 +137,16 @@ app.route('/api/analyses/datasetSearch/datasetFilters', methods=['GET'])(get_dat
 app.route('/api/analyses/datasetSearch/filter', methods=['POST'])(get_filters_data)
 app.route('/api/analyses/allTest',methods=["GET"])(getAllDatasetEcgs)
 
+
+from api.AnalyseExperienceApi import get_experiences_for_analysis, getAllExperiences, createExperience, getExperienceById
+
+app.route('/api/analyses/experiences/all/', methods=['GET'])(getAllExperiences)
+app.route('/api/analyses/<int:id_analyse>/experiences', methods=['GET'])(get_experiences_for_analysis)
+app.route('/api/analyses/experiences/<int:id_experience>', methods=['GET'])(getExperienceById)
+app.route('/api/analyses/<int:id_analyse>/experiences', methods=['POST'])(createExperience)
+
+
+
 if __name__ == "__main__":
     register_service_with_consul()
     app.run(debug=True, port=SERVICE_PORT, host='0.0.0.0')  # Utilisez '0.0.0.0' pour rendre votre service accessible à partir d'autres machines sur le réseau
