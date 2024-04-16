@@ -2,6 +2,8 @@ from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import CheckConstraint
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql.json import JSONB
 
 db = SQLAlchemy()
 class Model(db.Model):
@@ -91,6 +93,14 @@ class AnalysesModeles(db.Model):
     id_model = db.Column(db.Integer, db.ForeignKey('modeles.id'))
     id_analysis = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
 
+
+class AnalysesModeles(db.Model):
+    __tablename__ = 'analyses_modeles'
+
+    id_model_analysis = db.Column(db.Integer, primary_key=True)
+    id_model = db.Column(db.Integer, db.ForeignKey('modeles.id_model'))
+    id_analysis = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
+
 class Patient(db.Model):
     __tablename__ = 'patients'
 
@@ -116,6 +126,7 @@ class Ecg(db.Model):
 
     id_ecg = db.Column(db.Integer, primary_key=True)
     id_patient = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    origine_dataset = db.Column(db.Integer, db.ForeignKey('dataset.id_dataset'), nullable=False)
     filepath = db.Column(db.String, nullable=False)
     recording_started_at = db.Column(db.TIMESTAMP, nullable=False)
     recording_ended_at = db.Column(db.TIMESTAMP, nullable=False)
@@ -158,3 +169,29 @@ class DatasetsECG(db.Model):
     id_ecg = db.Column(db.Integer, db.ForeignKey('ecg.id_ecg'), primary_key=True)
 
 
+class Experiences(db.Model):
+    __tablename__ = 'experiences'
+    id_analysis_experience = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
+    id_experience = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name_experience = db.Column(db.String)
+    models = db.Column(ARRAY(db.Integer), nullable=False)
+    datasets = db.Column(ARRAY(db.Integer), nullable=False)
+    nom_machine = db.Column(db.String())
+    nb_gpu = db.Column(db.Integer)
+    nb_processeurs = db.Column(db.Integer)
+    heure_lancement = db.Column(db.Time, nullable=False, default= db.func.current_time())
+    heure_fin_prevu = db.Column(db.Time)
+    statut = db.Column(db.String(), nullable=False)
+    resultat_prediction  = db.Column(JSONB, default=lambda: {})
+
+    __table_args__ = (
+        CheckConstraint(statut.in_(['En cours', 'Terminé']), name='check_statut'),
+    )
+
+class Rapport(db.Model):
+    __tablename__ = 'rapports'
+
+    id_rapport = db.Column(db.Integer, primary_key=True)
+    id_experience_rapport = db.Column(db.Integer, db.ForeignKey('experiences.id_experience'), nullable=False)
+    created_at = db.Column(db.TIMESTAMP(timezone=True), default=db.func.current_timestamp(), nullable=False)
+    name_rapport = db.Column(db.String(), nullable=False)
