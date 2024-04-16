@@ -125,6 +125,7 @@ def getAllAnalyses():
 
 from api.AnalyseDatasetApi import getAllDatasetsTest, get_datasets_for_analysis, add_datasets_to_analysis,delete_dataset_from_analysis
 from api.AnalyseSearchDatasetApi import get_patient_filters,get_datasets_filters,get_filters_data,getAllDatasetEcgs
+from api.AnalyseModelApi import add_models_to_analysis,delete_model_from_analysis,get_models_for_analysis
 
 app.route('/api/analyses/all', methods=['GET'])(getAllDatasetsTest)
 app.route('/api/analyses/<int:id>/datasets', methods=['GET'])(get_datasets_for_analysis)
@@ -137,6 +138,12 @@ app.route('/api/analyses/datasetSearch/datasetFilters', methods=['GET'])(get_dat
 app.route('/api/analyses/datasetSearch/filter', methods=['POST'])(get_filters_data)
 app.route('/api/analyses/allTest',methods=["GET"])(getAllDatasetEcgs)
 
+
+app.route('/api/analyses/<int:id>/models/<int:id_model>', methods=['DELETE'])(delete_model_from_analysis)
+app.route('/api/analyses/<int:id>/models', methods=['GET'])(get_models_for_analysis)
+app.route('/api/analyses/<int:id>/models', methods=['POST'])(add_models_to_analysis)
+
 if __name__ == "__main__":
+   
     register_service_with_consul()
     app.run(debug=True, port=SERVICE_PORT, host='0.0.0.0')  # Utilisez '0.0.0.0' pour rendre votre service accessible à partir d'autres machines sur le réseau

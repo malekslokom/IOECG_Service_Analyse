@@ -4,7 +4,26 @@ from sqlalchemy import CheckConstraint
 from sqlalchemy.sql import func
 
 db = SQLAlchemy()
+class Model(db.Model):
+    __tablename__ = 'modeles'
 
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    author = db.Column(db.String(255))
+    project_name = db.Column(db.String(255))
+    description = db.Column(db.Text)
+    architecture_name = db.Column(db.String(255))
+    architecture_version = db.Column(db.String(50))
+    architecture_description = db.Column(db.Text)
+    total_params = db.Column(db.Integer)
+    model_size = db.Column(db.String(50))
+    batch_size = db.Column(db.Integer)
+    learning_rate = db.Column(db.Float)
+    task_nature = db.Column(db.String(50))
+    __table_args__ = (
+        CheckConstraint(task_nature.in_(['classification binaire', 'classification multi-class','régression']), name='check_task_nature'),
+    )
+    analyses = db.relationship('AnalysesModeles', backref='model', lazy=True)
 class Projet(db.Model):
     __tablename__ = 'projets'
 
@@ -34,7 +53,7 @@ class Analyses(db.Model):
     description_analysis = db.Column(db.Text)
     created_by = db.Column(db.String, nullable=False)
     datasets = db.relationship('AnalysesDatasets', backref='analyse', lazy=True)
-
+    modeles = db.relationship('AnalysesModeles', backref='analyse', lazy=True)
 
 class Datasets(db.Model):
     __tablename__ = 'datasets'
@@ -65,6 +84,12 @@ class AnalysesDatasets(db.Model):
 
     # dataset = db.relationship('Datasets', back_populates='analyses_datasets', primaryjoin=iddataset == Datasets.iddataset)
     # analyse = db.relationship('Analyses', back_populates='datasets', primaryjoin=idAnalysis == Analyses.idAnalysis)
+class AnalysesModeles(db.Model):
+    __tablename__ = 'analyses_modeles'
+
+    id_model_analysis = db.Column(db.Integer, primary_key=True)
+    id_model = db.Column(db.Integer, db.ForeignKey('modeles.id'))
+    id_analysis = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
 
 class Patient(db.Model):
     __tablename__ = 'patients'
