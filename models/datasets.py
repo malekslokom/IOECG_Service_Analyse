@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql.json import JSONB
 
 db = SQLAlchemy()
 
@@ -156,8 +157,16 @@ class Experiences(db.Model):
     heure_lancement = db.Column(db.Time, nullable=False, default= db.func.current_time())
     heure_fin_prevu = db.Column(db.Time)
     statut = db.Column(db.String(), nullable=False)
-    resultat_prediction  = db.Column(db.ARRAY(db.Float))
+    resultat_prediction  = db.Column(JSONB, default=lambda: {})
 
     __table_args__ = (
         CheckConstraint(statut.in_(['En cours', 'Terminé']), name='check_statut'),
     )
+
+class Rapport(db.Model):
+    __tablename__ = 'rapports'
+
+    id_rapport = db.Column(db.Integer, primary_key=True)
+    id_experience_rapport = db.Column(db.Integer, db.ForeignKey('experiences.id_experience'), nullable=False)
+    created_at = db.Column(db.TIMESTAMP(timezone=True), default=db.func.current_timestamp(), nullable=False)
+    name_rapport = db.Column(db.String(), nullable=False)
