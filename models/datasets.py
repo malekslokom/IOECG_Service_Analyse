@@ -93,14 +93,6 @@ class AnalysesModeles(db.Model):
     id_model = db.Column(db.Integer, db.ForeignKey('modeles.id'))
     id_analysis = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
 
-
-class AnalysesModeles(db.Model):
-    __tablename__ = 'analyses_modeles'
-
-    id_model_analysis = db.Column(db.Integer, primary_key=True)
-    id_model = db.Column(db.Integer, db.ForeignKey('modeles.id_model'))
-    id_analysis = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
-
 class Patient(db.Model):
     __tablename__ = 'patients'
 

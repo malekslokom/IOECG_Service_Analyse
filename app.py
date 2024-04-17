@@ -4,7 +4,7 @@ import json
 
 from consul import register_service_with_consul,SERVICE_PORT
 
-from models.datasets import db,Analyses, Datasets, AnalysesDatasets 
+from models.datasets import db
 
 from config.config import Config
 app = Flask(__name__)
