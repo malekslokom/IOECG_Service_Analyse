@@ -23,6 +23,7 @@ def addAnalyse():
     if not all([id_project, name_analysis, created_by]):
         return jsonify({"error": "Veuillez fournir toutes les données requises"}), 400
 
+    print(data)
     # Création de la nouvelle Analyse
     new_analysis = Analyses(id_project=id_project, name_analysis=name_analysis,
                            description_analysis=description_analysis, created_by=created_by)
@@ -71,12 +72,21 @@ def deleteAnalyseById(id):
    
 
 def getAnalyseById(id):
+    analyse = Analyses.query.filter_by(id_analysis=id).first()
     print(id)
-    with open('analyseStaticData.json') as f: 
-        analyses = json.load(f)
-        analyse=[item for item in analyses if item["id"] ==id]
-    if analyses:
-        return jsonify(analyse[0])
+
+    if analyse:
+
+        analyse_data = {
+            "id_analysis": analyse.id_analysis,
+            "id_project": analyse.id_project,
+            "created_at": analyse.created_at,
+            "last_updated_at": analyse.last_updated_at,
+            "name_analysis": analyse.name_analysis,
+            "description_analysis": analyse.description_analysis,
+            "created_by": analyse.created_by
+        }
+        return jsonify(analyse_data)
     else:
         return jsonify({"error": "Analyse not found"}), 404
     

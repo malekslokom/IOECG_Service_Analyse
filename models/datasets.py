@@ -93,14 +93,6 @@ class AnalysesModeles(db.Model):
     id_model = db.Column(db.Integer, db.ForeignKey('modeles.id'))
     id_analysis = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
 
-
-class AnalysesModeles(db.Model):
-    __tablename__ = 'analyses_modeles'
-
-    id_model_analysis = db.Column(db.Integer, primary_key=True)
-    id_model = db.Column(db.Integer, db.ForeignKey('modeles.id_model'))
-    id_analysis = db.Column(db.Integer, db.ForeignKey('analyses.id_analysis'))
-
 class Patient(db.Model):
     __tablename__ = 'patients'
 
@@ -179,8 +171,8 @@ class Experiences(db.Model):
     nom_machine = db.Column(db.String())
     nb_gpu = db.Column(db.Integer)
     nb_processeurs = db.Column(db.Integer)
-    heure_lancement = db.Column(db.Time, nullable=False, default= db.func.current_time())
-    heure_fin_prevu = db.Column(db.Time)
+    heure_lancement = db.Column(db.TIMESTAMP(timezone=True), default=db.func.current_timestamp(), nullable=False)
+    heure_fin_prevu = db.Column(db.TIMESTAMP(timezone=True), default=db.func.current_timestamp())
     statut = db.Column(db.String(), nullable=False)
     resultat_prediction  = db.Column(JSONB, default=lambda: {})
 

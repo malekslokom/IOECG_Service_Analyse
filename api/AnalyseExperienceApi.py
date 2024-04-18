@@ -93,7 +93,11 @@ def createExperience(id_analyse):
     try:
         # Valider et enregistrer les modifications dans la bdd
         db.session.commit()
-        return jsonify({"message": "Experience créé avec succès"}), 201
+
+        #Transmission de l'id_experience pour l'affichage immédiat des infos de l'experience
+        id_experience = new_experience.id_experience
+
+        return jsonify({"message": "Experience créé avec succès", "id_experience": id_experience}), 201
     except Exception as e:
         # Erreur, annuler les modifications et renvoyer un message d'erreur
         db.session.rollback()
@@ -113,7 +117,37 @@ def update_experience_status(id_experience):
     experience.statut = new_status
     try:
         db.session.commit()
-        return jsonify({"message": "Mise à jour du stautt réussi"}), 200
+        return jsonify({"message": "Mise à jour du statut réussi"}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    
+def update_experience_resultat(id_experience):
+    experience = Experiences.query.get(id_experience)
+    if not experience:
+        return jsonify({"error": "Experience non trouvée"}), 404
+    
+    data = request.json
+    new_resultat = data.get("resultat_prediction")
+    if new_resultat is None:
+        return jsonify({"error": "Champ 'resultat_prediction' vide"}), 400
+    
+    experience.resultat_prediction= new_resultat
+    try:
+        db.session.commit()
+        return jsonify({"message": "Mise à jour du resultat_prediction réussi"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+
+
+def deleteExperienceById(id_experience):
+    print(id_experience)
+    experience = Experiences.query.filter_by(id_experience=id_experience).first()  # on recupere l'experience à supprimer
+    if experience:
+        db.session.delete(experience)
+        db.session.commit()
+        return jsonify({"message": "Experience deleted with success"}), 201
+    else: 
+        return jsonify({"error": "Experience not found"}), 404

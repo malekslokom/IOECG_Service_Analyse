@@ -44,14 +44,17 @@ app.route('/api/analyses/allTest',methods=["GET"])(getAllDatasetEcgs)
 app.route('/api/analyses/<int:id>/models/<int:id_model>', methods=['DELETE'])(delete_model_from_analysis)
 app.route('/api/analyses/<int:id>/models', methods=['GET'])(get_models_for_analysis)
 app.route('/api/analyses/<int:id>/models', methods=['POST'])(add_models_to_analysis)
+
 from api.AnalyseExperienceApi import get_experiences_for_analysis, getAllExperiences, createExperience, getExperienceById,\
-                                    update_experience_status
+                                    update_experience_status, update_experience_resultat, deleteExperienceById
 
 app.route('/api/analyses/experiences/all/', methods=['GET'])(getAllExperiences)
 app.route('/api/analyses/<int:id_analyse>/experiences', methods=['GET'])(get_experiences_for_analysis)
 app.route('/api/analyses/experiences/<int:id_experience>', methods=['GET'])(getExperienceById)
 app.route('/api/analyses/<int:id_analyse>/experiences', methods=['POST'])(createExperience)
 app.route('/api/analyses/experiences/<int:id_experience>/update-status', methods=['PUT'])(update_experience_status)
+app.route('/api/analyses/experiences/<int:id_experience>/update-resultat', methods=['PUT'])(update_experience_resultat)
+app.route('/api/analyses/experiences/delete/<int:id_experience>', methods=['DELETE'])(deleteExperienceById)
 
 
 if __name__ == "__main__":
