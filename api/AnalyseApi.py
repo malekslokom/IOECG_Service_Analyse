@@ -44,8 +44,7 @@ def addAnalyse():
 
 def getAllAnalyses():
     # Récupérer toutes les analyses depuis la base de données
-    all_analyses = Analyses.query.all()
-
+    all_analyses = Analyses.query.order_by(Analyses.created_at.desc()).all()
     # Créer la liste des analyses pour les renvoyer au client
     serialized_analyses = [{
             "id_analysis": analysis.id_analysis,
