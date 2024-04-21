@@ -103,17 +103,30 @@ def filter_data():
     start_date = convert_date(start_date_str) if start_date_str else None
     end_date = convert_date(end_date_str) if end_date_str else None
 
-    with open('analyseStaticData.json') as f:
-        data = json.load(f)
-        filtered_data = []
-        for item in data:
-            item_date = convert_date(item['dateCreation'])
-            if ((not start_date or item_date >= start_date) and
-                (not end_date or item_date <= end_date) and
-                (not search_term or search_term in item['nom'].lower() or search_term in item['type'].lower())):
-                filtered_data.append(item)
+    query = Analyses.query
+    if start_date:
+        query = query.filter(Analyses.created_at >= start_date)
+    if end_date:
+        query = query.filter(Analyses.created_at <= end_date)
+    if search_term:
+        query = query.filter((Analyses.name_analysis.ilike(f'%{search_term}%')) |
+                             (Analyses.description_analysis.ilike(f'%{search_term}%')) |
+                             (Analyses.created_by.ilike(f'%{search_term}%')) )
 
-        if filtered_data:
-            return jsonify(filtered_data)
-        else:
-            return jsonify({"error": "No analyse found matching the criteria"}), 404
+    # Exécution de la requête et récupération des résultats
+    filtered_analysis = query.all()
+
+    if filtered_analysis:
+        # Convertir les résultats en une liste de dictionnaires
+        analyse_data=[{
+            "id_analysis":analyse.id_analysis,
+            "id_project":analyse.id_project,
+            "created_at":analyse.created_at,
+            "name_analysis":analyse.name_analysis,
+            "description_analysis":analyse.description_analysis,
+            "created_by":analyse.created_by        
+        } for analyse in filtered_analysis]
+        return jsonify(analyse_data)
+        
+    else:
+        return jsonify({"error": "No analyse found matching the criteria"}), 404
