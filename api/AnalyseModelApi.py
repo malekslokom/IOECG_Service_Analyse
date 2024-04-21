@@ -54,6 +54,7 @@ def add_models_to_analysis(id):
         db.session.rollback()  
         print("Error: ", str(e))
         return jsonify({"error": str(e)}), 500 
+    
 def delete_model_from_analysis(id, id_model):
     try:
         analysis_model = AnalysesModeles.query \
@@ -67,6 +68,23 @@ def delete_model_from_analysis(id, id_model):
         db.session.commit()
 
         return jsonify({'message': 'Model deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+    
+def delete_models_for_analysis(id_analysis):
+    print(id_analysis)
+    try:
+        # Récupérer tous les enregistrements de AnalysesModeles où id_analysis est égal à l'ID passé
+        analysis_models = AnalysesModeles.query.filter_by(id_analysis=id_analysis).all()
+
+        if analysis_models:
+            for model in analysis_models:
+                db.session.delete(model)  # Supprimer chaque enregistrement trouvé
+            db.session.commit()
+            return jsonify({"message": "All models for the analysis deleted with success"}), 201
+        else:
+            return jsonify({"error": "No models found for this analysis"}), 404
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500

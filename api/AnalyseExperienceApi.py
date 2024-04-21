@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from flask import jsonify, request
-from models.datasets import db,Analyses, Datasets, AnalysesDatasets, AnalysesModeles, DatasetsECG, Experiences
+from models.datasets import Rapport, db,Analyses, Datasets, AnalysesDatasets, AnalysesModeles, DatasetsECG, Experiences
 
 
 def getAllExperiences():
@@ -40,6 +40,30 @@ def get_experiences_for_analysis(id_analyse):
                         "statut": exp.statut} 
                          for exp in experiences]
     return jsonify(serialized_experiences)
+
+def delete_experiences_for_analysis(id_analysis):
+    print(id_analysis)
+    try:
+        # Récupérer toutes les expériences où id_analysis_experience est égal à l'ID passé
+        analysis_experiences = Experiences.query.filter_by(id_analysis_experience=id_analysis).all()
+
+        if analysis_experiences:
+            for experience in analysis_experiences:
+                # Avant de supprimer l'expérience, supprimer tous les rapports associés
+                associated_reports = Rapport.query.filter_by(id_experience_rapport=experience.id_experience).all()
+                for report in associated_reports:
+                    db.session.delete(report)  # Supprimer chaque rapport trouvé
+
+                db.session.delete(experience)  # Supprimer l'expérience après avoir supprimé les rapports
+
+            db.session.commit()
+            return jsonify({"message": "All experiences and their associated reports for the analysis deleted with success"}), 201
+        else:
+            return jsonify({"error": "No experiences found for this analysis"}), 404
+    except Exception as e:
+        # Erreur, annuler les modifications et renvoyer un message d'erreur
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 def getExperienceById(id_experience):
     experience = Experiences.query.filter_by(id_experience=id_experience).first()

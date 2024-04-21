@@ -60,6 +60,23 @@ def get_datasets_for_analysis(id):
         return jsonify(serialized_datasets), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+def delete_datasets_for_analysis(id_analysis):
+    print(id_analysis)
+    try:
+        # Récupérer tous les enregistrements de AnalysesDatasets où id_analysis est égal à l'ID passé
+        analysis_datasets = AnalysesDatasets.query.filter_by(id_analysis=id_analysis).all()
+
+        if analysis_datasets:
+            for dataset in analysis_datasets:
+                db.session.delete(dataset)  # Supprimer chaque enregistrement trouvé
+            db.session.commit()
+            return jsonify({"message": "All datasets for the analysis deleted with success"}), 201
+        else:
+            return jsonify({"error": "No datasets found for this analysis"}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 def add_datasets_to_analysis(id):
     try:

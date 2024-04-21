@@ -25,14 +25,15 @@ app.route('/api/analyses/<int:id>',methods=["GET"]) (getAnalyseById)   #fonction
 app.route('/api/analyses/filter', methods=['GET']) (filter_data)    #fonction à revoir, données statiques
 
 
-from api.AnalyseDatasetApi import getAllDatasetsTest, get_datasets_for_analysis, add_datasets_to_analysis,delete_dataset_from_analysis
+from api.AnalyseDatasetApi import delete_datasets_for_analysis, getAllDatasetsTest, get_datasets_for_analysis, add_datasets_to_analysis,delete_dataset_from_analysis
 from api.AnalyseSearchDatasetApi import get_patient_filters,get_datasets_filters,get_filters_data,getAllDatasetEcgs
-from api.AnalyseModelApi import add_models_to_analysis,delete_model_from_analysis,get_models_for_analysis
+from api.AnalyseModelApi import add_models_to_analysis,delete_model_from_analysis, delete_models_for_analysis,get_models_for_analysis
 
 app.route('/api/analyses/all', methods=['GET'])(getAllDatasetsTest)
 app.route('/api/analyses/<int:id>/datasets', methods=['GET'])(get_datasets_for_analysis)
 app.route('/api/analyses/<int:id>/datasets', methods=['POST'])(add_datasets_to_analysis)
 app.route('/api/analyses/<int:id>/datasets/<int:id_dataset>', methods=['DELETE'])(delete_dataset_from_analysis)
+app.route('/api/analyses/<int:id>/datasets', methods=['DELETE'])(delete_datasets_for_analysis)
 
 
 app.route('/api/analyses/datasetSearch/patientFilters', methods=['GET'])(get_patient_filters)
@@ -40,11 +41,11 @@ app.route('/api/analyses/datasetSearch/datasetFilters', methods=['GET'])(get_dat
 app.route('/api/analyses/datasetSearch/filter', methods=['POST'])(get_filters_data)
 app.route('/api/analyses/allTest',methods=["GET"])(getAllDatasetEcgs)
 
-
 app.route('/api/analyses/<int:id>/models/<int:id_model>', methods=['DELETE'])(delete_model_from_analysis)
+app.route('/api/analyses/<int:id>/models/', methods=['DELETE'])(delete_models_for_analysis)
 app.route('/api/analyses/<int:id>/models', methods=['GET'])(get_models_for_analysis)
 app.route('/api/analyses/<int:id>/models', methods=['POST'])(add_models_to_analysis)
-from api.AnalyseExperienceApi import get_experiences_for_analysis, getAllExperiences, createExperience, getExperienceById,\
+from api.AnalyseExperienceApi import delete_experiences_for_analysis, get_experiences_for_analysis, getAllExperiences, createExperience, getExperienceById,\
                                     update_experience_status
 
 app.route('/api/analyses/experiences/all/', methods=['GET'])(getAllExperiences)
@@ -52,6 +53,9 @@ app.route('/api/analyses/<int:id_analyse>/experiences', methods=['GET'])(get_exp
 app.route('/api/analyses/experiences/<int:id_experience>', methods=['GET'])(getExperienceById)
 app.route('/api/analyses/<int:id_analyse>/experiences', methods=['POST'])(createExperience)
 app.route('/api/analyses/experiences/<int:id_experience>/update-status', methods=['PUT'])(update_experience_status)
+app.route('/api/analyses/<int:id_analyse>/experiences', methods=['DELETE'])(delete_experiences_for_analysis)
+
+
 
 
 if __name__ == "__main__":
