@@ -105,6 +105,14 @@ def createExperience(id_analyse):
     heure_fin_prevu = data.get("heure_fin_prevu"),
     statut = data.get("statut")
     
+    print(models)
+    print(datasets)
+    # Convertir les chaînes de caractères en listes d'entiers
+    # models = str(data.get("models")).replace('{{', '{').replace('}}', '}')  # Correction ici
+    # datasets = str(data.get("datasets")).replace('{{', '{').replace('}}', '}')  # Correction ici
+
+    
+
     print(data)
 
     # Création de la nouvelle experience
