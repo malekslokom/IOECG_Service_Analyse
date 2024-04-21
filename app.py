@@ -4,7 +4,7 @@ import json
 
 from consul import register_service_with_consul,SERVICE_PORT
 
-from models.datasets import db,Analyses, Datasets, AnalysesDatasets 
+from models.datasets import db
 
 from config.config import Config
 app = Flask(__name__)
@@ -45,8 +45,9 @@ app.route('/api/analyses/<int:id>/models/<int:id_model>', methods=['DELETE'])(de
 app.route('/api/analyses/<int:id>/models/', methods=['DELETE'])(delete_models_for_analysis)
 app.route('/api/analyses/<int:id>/models', methods=['GET'])(get_models_for_analysis)
 app.route('/api/analyses/<int:id>/models', methods=['POST'])(add_models_to_analysis)
-from api.AnalyseExperienceApi import delete_experiences_for_analysis, get_experiences_for_analysis, getAllExperiences, createExperience, getExperienceById,\
-                                    update_experience_status
+
+from api.AnalyseExperienceApi import delete_experiences_for_analysis,get_experiences_for_analysis, getAllExperiences, createExperience, getExperienceById,\
+                                    update_experience_status, update_experience_resultat, deleteExperienceById
 
 app.route('/api/analyses/experiences/all/', methods=['GET'])(getAllExperiences)
 app.route('/api/analyses/<int:id_analyse>/experiences', methods=['GET'])(get_experiences_for_analysis)
@@ -56,6 +57,8 @@ app.route('/api/analyses/experiences/<int:id_experience>/update-status', methods
 app.route('/api/analyses/<int:id_analyse>/experiences', methods=['DELETE'])(delete_experiences_for_analysis)
 
 
+app.route('/api/analyses/experiences/<int:id_experience>/update-resultat', methods=['PUT'])(update_experience_resultat)
+app.route('/api/analyses/experiences/delete/<int:id_experience>', methods=['DELETE'])(deleteExperienceById)
 
 
 if __name__ == "__main__":
