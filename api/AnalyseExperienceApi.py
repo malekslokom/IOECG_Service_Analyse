@@ -95,14 +95,15 @@ def createExperience(id_analyse):
     print(id_analyse)
 
     id_analysis_experience = data.get('id_analysis_experience')
-    name_experience = data.get('name_experience'),
-    models = data.get("models"),
-    datasets = data.get("datasets"),
-    nom_machine = data.get("nom_machine"),
-    nb_gpu = data.get("nb_gpu"),
-    nb_processeurs = data.get("nb_processeurs"),
-    heure_lancement = data.get("heure_lancement"),
-    heure_fin_prevu = data.get("heure_fin_prevu"),
+    name_experience = data.get('name_experience')
+    models = data.get("models")
+    datasets = data.get("datasets")
+    nom_machine = data.get("nom_machine")
+    nb_gpu = data.get("nb_gpu")
+    nb_processeurs = data.get("nb_processeurs")
+    heure_lancement = data.get("heure_lancement")
+    heure_fin_prevu = data.get("heure_fin_prevu")
+    resultat_prediction=data.get("resultat_prediction")
     statut = data.get("statut")
     
     print(models)
@@ -119,7 +120,7 @@ def createExperience(id_analyse):
     new_experience = Experiences(id_analysis_experience=id_analysis_experience,name_experience=name_experience,models=models,
                                  datasets=datasets,nom_machine=nom_machine,nb_gpu=nb_gpu,
                                   nb_processeurs=nb_processeurs, heure_lancement=heure_lancement,
-                                  heure_fin_prevu=heure_fin_prevu, statut=statut )   
+                                  heure_fin_prevu=heure_fin_prevu, statut=statut,resultat_prediction=resultat_prediction )   
     # Ajouter dans la bdd
     db.session.add(new_experience)
     try:

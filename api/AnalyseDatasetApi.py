@@ -93,25 +93,7 @@ def add_datasets_to_analysis(id):
         
         db.session.commit()
 
-        # Rafraîchir les données des datasets de l'analyse après l'ajout des nouvelles datasets
-        # updated_datasets = Datasets.query.join(AnalysesDatasets, AnalysesDatasets.id_dataset == Datasets.id_dataset) \
-        #                           .filter(AnalysesDatasets.id_analysis == id) \
-        #                           .all()
-
-        # serialized_datasets = [{
-        #     "idDataset": dataset.id_dataset,
-        #     "created_at": dataset.created_at,
-        #     "nameDataset": dataset.name_dataset,
-        #     "descriptionDataset": dataset.description_dataset,
-        #     "typeDataset": dataset.type_dataset,
-        #     "leads_name": dataset.leads_name,
-        #     "study_name": dataset.study_name,
-        #     "study_details": dataset.study_details,
-        #     "source_name": dataset.source_name,
-        #     "source_details": dataset.source_details
-        # } for dataset in updated_datasets]
-
-        # return jsonify(serialized_datasets), 200
+       
         return get_datasets_for_analysis(id)
     except Exception as e:
         db.session.rollback()  

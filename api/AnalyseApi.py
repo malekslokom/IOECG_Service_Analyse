@@ -27,7 +27,7 @@ def addAnalyse():
     # Création de la nouvelle Analyse
     new_analysis = Analyses(id_project=id_project, name_analysis=name_analysis,
                            description_analysis=description_analysis, created_by=created_by)
-
+    print(new_analysis)
     # Ajout à la session de la base de données
     db.session.add(new_analysis)
 
